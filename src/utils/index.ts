@@ -185,17 +185,12 @@ function sortByKey(rawFlights: any[], by: string, order: "ASC" | "DESC") {
 }
 
 const isValidFlight = (flight: FormatedFlight, filters: FilterOptions) => {
-  const arrayOfFilters: [string, boolean][] = Object.entries(filters); // [[isOvernight, true], [hasStops, true]]
-  let isValid = true;
-  arrayOfFilters.forEach((filter) => {
-    if (
-      ["longStopover", "shortStopover", "overnight"].includes(filter[0]) &&
-      filter[1] !== flight[filter[0] as "longStopover" | "shortStopover" | "overnight"]
-    )
-      isValid = false;
-    if (filter[0] === "noStops" && (flight.stopoversCount === 0) !== filter[1]) isValid = false;
-  });
-  return true || isValid;
+  return true || (flight && filters);
+  // return (
+  //   flight.overnight === filters.overnight &&
+  //   flight.shortStopover === filters.shortStopover &&
+  //   filters.noStops === (flight.stopoversCount === 0)
+  // );
 };
 
 export const formatDate = (date: string) => {
