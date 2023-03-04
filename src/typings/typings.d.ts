@@ -3,6 +3,11 @@ interface ApiErrorResponse {
   success?: boolean;
 }
 
+interface FunctionError {
+  message: any;
+  error: true;
+}
+
 //#region Search Airport IATA types
 interface SearchAirportResponse extends ApiErrorResponse {
   data?: SearchAirportItem[];

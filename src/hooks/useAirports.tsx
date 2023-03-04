@@ -4,22 +4,25 @@ import { searchAirportsByTerm } from "../utils";
 // used to search airports by name
 const useSearchAirports = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<boolean>(false);
   const [airports, setAirports] = useState<AirportItem[]>([]);
-  const [selectedAirport, setSelectedAirport] = useState<null | AirportItem>();
 
   const searchAirports = async (term: string) => {
     if (!term) return;
     try {
+      setError(false);
       setIsLoading(true);
       const airportIds = await searchAirportsByTerm(term);
       console.log("airportIds", airportIds);
-
-      setAirports(airportIds);
-      setIsLoading(false);
+      if (Array.isArray(airportIds)) {
+        setAirports(airportIds);
+        setIsLoading(false);
+      } else {
+        setError(true);
+      }
     } catch (error) {
       console.error("An error ocurred trying to fetch airports", error);
-      setError(error);
+      setError(true);
     }
   };
 
@@ -27,9 +30,7 @@ const useSearchAirports = () => {
     isLoading,
     searchAirports,
     error,
-    airports,
-    setSelectedAirport,
-    selectedAirport
+    airports
   };
 };
 

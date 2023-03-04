@@ -1,31 +1,32 @@
 import { useEffect, useState } from "react";
-import { getFilteredFlights, getRandomFlights } from "../utils";
+import { getFilteredFlights, getRawFlights } from "../utils";
 
 //used to fetch flights and sort/filter
 const useFlights = (filterOptions: FilterOptions, sortingOptions: SortingOptions) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [randomFlights, setRandomFlights] = useState<any[]>([]);
+  const [isLoadingFlights, setIsLoadingFlights] = useState(false);
+  const [rawFlights, setRawFlights] = useState<any[]>([]);
   const [filteredFlights, setFilteredFlights] = useState<any[]>([]);
 
-  const getRandomFlightsTrigger = async (departureIata: string, date: string) => {
+  const getFlightsTrigger = async (departureIata: string, date: string) => {
     try {
-      setIsLoading(true);
-      const flights = await getRandomFlights(departureIata, date);
-      setRandomFlights(flights);
+      setIsLoadingFlights(true);
+      const flights = await getRawFlights(departureIata, date);
+      setRawFlights(flights);
     } catch (error) {
       console.error("error", error);
     }
   };
 
   useEffect(() => {
-    setFilteredFlights(getFilteredFlights(randomFlights, filterOptions, sortingOptions));
-    setIsLoading(false);
-  }, [sortingOptions, filterOptions, randomFlights]);
+    setFilteredFlights(getFilteredFlights(rawFlights, filterOptions, sortingOptions));
+    setIsLoadingFlights(false);
+  }, [sortingOptions, filterOptions, rawFlights]);
 
   return {
-    getRandomFlightsTrigger,
+    getFlightsTrigger,
     filteredFlights,
-    isLoading
+    isLoadingFlights,
+    rawFlights
   };
 };
 export default useFlights;

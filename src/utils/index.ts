@@ -1,8 +1,13 @@
-const APIKEY = "63ffe1c92f0391f4387cc1fa";
+//TODO .env
+const APIKEY = "6402bca65aff273b2060f3ff";
 
-export const searchAirportsByTerm = async (term: string): Promise<AirportItem[]> => {
+//function used to display results to select in input
+export const searchAirportsByTerm = async (
+  term: string
+): Promise<AirportItem[] | FunctionError> => {
   try {
     if (!term) throw Error("No Term Found");
+    //fetch airports
     const response: SearchAirportResponse = await (
       await fetch(`https://api.flightapi.io/iata/${APIKEY}?name=${term}&type=airport`)
     ).json();
@@ -18,28 +23,41 @@ export const searchAirportsByTerm = async (term: string): Promise<AirportItem[]>
         name
       })) ?? []
     );
-  } catch (error) {
-    console.error("An Error ocurred while fetching airports", error);
-    return [];
+  } catch (message) {
+    console.error("An Error ocurred while fetching airports", message);
+    return { error: true, message: message };
   }
 };
 
-export const getReleatedAirportsIds = async (airportId: string) => {
+const getAirportIdsFromSchedule = (data: AirportScheduleResponse) => {
+  return (
+    data?.airport?.pluginData?.schedule?.departures?.data
+      ?.map((item) => item.flight.airport.destination.code.iata)
+      ?.slice(0, 15) || []
+  );
+};
+
+//function used to fetch the airports IATA (id) that will be used as arrival airports
+export const getReleatedAirportsIds = async (airportId: string, date: string) => {
   try {
+    const day = "3"; //TODO getDaysTillDate(date)
+
+    console.log("date", date);
+
     const data: AirportScheduleResponse = await (
       await fetch(
-        `https://api.flightapi.io/schedule/${APIKEY}?mode=departures&day=3&iata=${airportId}`
+        `https://api.flightapi.io/schedule/${APIKEY}?mode=departures&day=${day}&iata=${airportId}`
       )
     ).json();
-    console.log("data", data);
-    const airports = data?.airport?.pluginData?.schedule?.departures?.data?.map(
-      (item) => item.flight.airport.destination.code.iata
-    );
-    console.log("airports", airports);
-    if (!airports) return [];
+    if (data.message) {
+      throw Error(data.message);
+    }
 
-    const usedAirports = airports.slice(0, 10);
-    return usedAirports;
+    console.log("data", data);
+    const airportIds = getAirportIdsFromSchedule(data);
+    if (!airportIds) return [];
+
+    return airportIds;
   } catch (error) {
     console.error("An Error ocurred while fetching airports", error);
     return [];
@@ -51,36 +69,46 @@ export const searchFlights = async (
   arrivalIata: string,
   selectedDate: string
 ) => {
-  const flightData = await (
-    await fetch(
-      `https://api.flightapi.io/onewaytrip/${APIKEY}/${departureIata}/${arrivalIata}/${selectedDate}/1/0/0/Economy/USD`
-    )
-  ).json();
-  //format flightData
+  try {
+    const flightData = await (
+      await fetch(
+        `https://api.flightapi.io/onewaytrip/${APIKEY}/${departureIata}/${arrivalIata}/${selectedDate}/1/0/0/Economy/USD`
+      )
+    ).json();
+    //TODO format flightData
 
-  return flightData;
+    return flightData;
+  } catch (error) {
+    console.error("error", error);
+    return;
+  }
 };
 
-//TODO other name
-export const searchAllFlightsFromIatas = async (
+export const searchAllFlightsFromArrivalList = async (
   departureIata: string,
   relatedIatas: string[],
   selectedDate: string
 ) => {
   const allFlights: any[] = [];
   for await (const airportId of relatedIatas) {
-    console.log("start looking for data of ", airportId);
-    const flightsData = await searchFlights(departureIata, airportId, selectedDate);
-    console.log("flightData", flightsData);
-    return allFlights.concat(flightsData);
+    try {
+      console.log("start looking for data of ", airportId);
+      const flightsData = await searchFlights(departureIata, airportId, selectedDate);
+      console.log("flightData", flightsData);
+      if (flightsData && !flightsData.message) {
+        allFlights.concat(flightsData);
+      }
+    } catch (error) {
+      console.error("error", error);
+    }
   }
 
   return allFlights;
 };
 
-export const getRandomFlights = async (departureIata: string, date: string) => {
-  const relatedAirportIds = await getReleatedAirportsIds(departureIata);
-  const randomFlights = searchAllFlightsFromIatas(departureIata, relatedAirportIds, date);
+export const getRawFlights = async (departureIata: string, date: string) => {
+  const relatedAirportIds = await getReleatedAirportsIds(departureIata, date);
+  const randomFlights = searchAllFlightsFromArrivalList(departureIata, relatedAirportIds, date);
   return randomFlights;
 };
 
@@ -90,20 +118,19 @@ export const getFilteredFlights = (
   sortingOptions: SortingOptions
 ) => {
   const filteredFlights = flights.filter((selectedFlight) =>
-    isValidFlights(selectedFlight, filterOptions)
+    isValidFlight(selectedFlight, filterOptions)
   );
 
   return handleFlightSorting(filteredFlights, sortingOptions);
 };
 
-//TODO
 const handleFlightSorting = (flights: any[], sortinOptions: SortingOptions) => {
+  //TODO
+  if (flights.length > 100000) console.log(sortinOptions);
   return flights;
 };
 
-//TODO naming
-const isValidFlights = (flight: any, filters: FilterOptions) => {
-  const arrayOfFilters = Object.entries(filters);
-
+const isValidFlight = (flight: any, filters: FilterOptions) => {
+  const arrayOfFilters: [string, boolean][] = Object.entries(filters); // [[isOvernight, true], [hasStops, true]]
   return !arrayOfFilters.some((filter) => flight[filter[0]] === filter[1]);
 };
