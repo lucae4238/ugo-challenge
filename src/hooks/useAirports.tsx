@@ -13,7 +13,6 @@ const useSearchAirports = () => {
       setError(false);
       setIsLoading(true);
       const airportIds = await searchAirportsByTerm(term);
-      console.log("airportIds", airportIds);
       if (Array.isArray(airportIds)) {
         setAirports(airportIds);
         setIsLoading(false);

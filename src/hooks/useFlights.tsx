@@ -4,25 +4,36 @@ import { getFilteredFlights, getRawFlights } from "../utils";
 //used to fetch flights and sort/filter
 const useFlights = (filterOptions: FilterOptions, sortingOptions: SortingOptions) => {
   const [isLoadingFlights, setIsLoadingFlights] = useState(false);
-  const [rawFlights, setRawFlights] = useState<any[]>([]);
-  const [filteredFlights, setFilteredFlights] = useState<any[]>([]);
+  const [rawFlights, setRawFlights] = useState<FormatedFlight[]>([]);
+  const [filteredFlights, setFilteredFlights] = useState<FormatedFlight[]>([]);
+  const [error, setError] = useState(false);
 
   const getFlightsTrigger = async (departureIata: string, date: string) => {
     try {
       setIsLoadingFlights(true);
+      setError(false);
       const flights = await getRawFlights(departureIata, date);
-      setRawFlights(flights);
+      if (Array.isArray(flights)) {
+        setRawFlights(flights);
+      } else setError(true);
     } catch (error) {
+      setError(true);
       console.error("error", error);
     }
   };
 
   useEffect(() => {
-    setFilteredFlights(getFilteredFlights(rawFlights, filterOptions, sortingOptions));
-    setIsLoadingFlights(false);
+    try {
+      setFilteredFlights(getFilteredFlights(rawFlights, filterOptions, sortingOptions));
+      setIsLoadingFlights(false);
+    } catch (error) {
+      console.error("error", error);
+      setError(true);
+    }
   }, [sortingOptions, filterOptions, rawFlights]);
 
   return {
+    error,
     getFlightsTrigger,
     filteredFlights,
     isLoadingFlights,

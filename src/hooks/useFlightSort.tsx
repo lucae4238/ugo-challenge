@@ -4,8 +4,7 @@ import { useState } from "react";
 export const useFlightSort = () => {
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     noStops: true,
-    beforeMidDay: true,
-    afterMidDay: true,
+    overnight: true,
     longStopover: true,
     shortStopover: true
   });

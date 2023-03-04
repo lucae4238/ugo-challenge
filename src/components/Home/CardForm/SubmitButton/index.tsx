@@ -9,11 +9,14 @@ export const SubmitButton: React.FC<SubmitButtonProps> = () => {
   const { handleGetFlights, departureAirport, departureDate, isLoadingFlights } =
     useContext(SearchFlightsContext);
   return (
-    <Button
-      disabled={!departureAirport || !departureDate || isLoadingFlights}
-      onClick={handleGetFlights}>
-      Go!
-    </Button>
+    <div className="postition-absolute searchFlightsButton">
+      <Button
+        disabled={!departureAirport || !departureDate || isLoadingFlights}
+        variant="contained"
+        onClick={handleGetFlights}>
+        Go!
+      </Button>
+    </div>
   );
 };
 

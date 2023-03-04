@@ -2,6 +2,7 @@ import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { Autocomplete, AutocompleteChangeReason, TextField } from "@mui/material";
 import useAirports from "../../../../hooks/useAirports";
 import { SearchFlightsContext } from "../../../../Context/SearchFlightsContext";
+import plain from "../../../../assets/plain.svg";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SelectDepartureProps {}
@@ -14,7 +15,6 @@ export const SelectDeparture: React.FC<SelectDepartureProps> = () => {
 
   const handleInputChange = (_e: SyntheticEvent<Element, Event>, inputValue: string) => {
     if (inputValue === searchTerm) return;
-    console.log("se cambia value", { old: searchTerm, new: inputValue });
     setSearchTerm(inputValue || "");
   };
 
@@ -24,7 +24,6 @@ export const SelectDeparture: React.FC<SelectDepartureProps> = () => {
     reason: AutocompleteChangeReason
   ) => {
     if (reason === "selectOption" && value) {
-      console.log("se selecciona la opcion", value);
       setDepartureAirport?.(value.iata);
     }
   };
@@ -41,7 +40,6 @@ export const SelectDeparture: React.FC<SelectDepartureProps> = () => {
     const handleFetchingAirports = setTimeout(() => {
       //avoid fetching when selecting value from list of already fetched airports
       if (airports.find((item) => item.name === searchTerm)) return;
-      console.log("se ejecuta la busqueda");
       searchAirports(searchTerm);
     }, 1000);
 
@@ -51,23 +49,30 @@ export const SelectDeparture: React.FC<SelectDepartureProps> = () => {
   }, [searchTerm]);
 
   return (
-    <div className="container border">
-      <p>From where do you travel</p>
-      <Autocomplete
-        noOptionsText={error ? "An error has ocurred" : "No Airports found"}
-        inputValue={searchTerm}
-        onInputChange={handleInputChange}
-        onChange={handleOnChange}
-        getOptionLabel={(option) => option.name} //logic to render labels
-        loading={!error && isLoading}
-        disablePortal
-        id="airports-input"
-        options={airports}
-        sx={{ width: 300 }}
-        renderInput={(params) => (
-          <TextField {...params} error={!!error} label={"Search an Airport"} />
-        )}
-      />
+    <div className="my-4 container me-3 d-flex  justify-content-end selectDeparture-container">
+      <div className="d-flex justify-content-center flex-column text-center">
+        <div className="mb-1 d-flex items-center">
+          <p className="m-0">From where do you travel</p>
+          <img className="ms-3" src={plain} alt={"plain"} />
+        </div>
+        <Autocomplete
+          noOptionsText={
+            error ? "An error has ocurred" : searchTerm ? "No Airports found" : "Start searching"
+          }
+          inputValue={searchTerm}
+          onInputChange={handleInputChange}
+          onChange={handleOnChange}
+          getOptionLabel={(option) => option.name} //logic to render labels
+          loading={!error && isLoading}
+          disablePortal
+          id="airports-input"
+          options={airports}
+          sx={{ width: 300 }}
+          renderInput={(params) => (
+            <TextField {...params} error={!!error} label={"Search an Airport"} />
+          )}
+        />
+      </div>
     </div>
   );
 };

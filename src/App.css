@@ -1,38 +1,57 @@
-.App {
-  text-align: center;
+.flightCard-price {
+  font-weight: bold;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.flightCard-heading {
+  font-size: 1.25rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.flightCard-info {
+  color: rgb(104, 100, 100)
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* #region CardForm */
+
+.startScreen-container,.cardFormContainer {
+  min-height: 23.5rem;
+}
+
+.selectDeparture-container .MuiOutlinedInput-notchedOutline,
+.selectDate-container input {
+  border: 1.75px solid #9098F5 !important;
+  border-radius: 0.75rem !important;
+}
+
+label#airports-input-label:before {
+  content: "A";
+  margin-left: 0.5rem;
+  margin-right: 1rem;
+}
+
+.MuiAutocomplete-root {
+  max-width: 15rem;
+}
+
+.selectDate-container input {
+  padding: 1rem;
+  width: 13rem;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-direction: row-reverse;
 }
 
-.App-link {
-  color: #61dafb;
+.selectDate-container .MuiInputBase-root::after,
+.selectDate-container .MuiInputBase-root::before {
+  display: none;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.searchFlightsButton {
+  position: absolute;
+  bottom: -1.25rem;
+  left: 46%;
+}
+
+/* #endregion CardForm */
+
+.MuiSelect-listbox{
+  background: white !important
 }
